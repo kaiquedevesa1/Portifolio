@@ -71,74 +71,14 @@ const otherProjects = [
   },
 ];
 
-// 3D Tilt card wrapper — premium hover effect
-function TiltCard({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      const rotateX = -(y - 0.5) * 12;
-      const rotateY = (x - 0.5) * 12;
-
-      gsap.to(el, {
-        rotateX,
-        rotateY,
-        transformPerspective: 900,
-        duration: 0.5,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    };
-
-    const handleMouseLeave = () => {
-      gsap.to(el, {
-        rotateX: 0,
-        rotateY: 0,
-        duration: 1,
-        ease: "elastic.out(1, 0.55)",
-        overwrite: "auto",
-      });
-    };
-
-    el.addEventListener("mousemove", handleMouseMove);
-    el.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      el.removeEventListener("mousemove", handleMouseMove);
-      el.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={className}
-      style={{ transformStyle: "preserve-3d" }}
-    >
-      {children}
-    </div>
-  );
-}
-
 export function Projects() {
   const sectionRef = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
+  const titleRef   = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Title
+
+      // ── Title (unchanged) ──────────────────────────────────────────────────
       gsap.fromTo(
         titleRef.current,
         { opacity: 0, x: -30 },
@@ -147,55 +87,42 @@ export function Projects() {
           x: 0,
           duration: 0.8,
           ease: "power3.out",
-          scrollTrigger: {
-            trigger: titleRef.current,
-            start: "top 85%",
-          },
+          scrollTrigger: { trigger: titleRef.current, start: "top 85%" },
         },
       );
 
-      // Featured projects — alternating left/right slide with image scale
-      const featured =
-        sectionRef.current?.querySelectorAll(".featured-project");
-      featured?.forEach((project, index) => {
-        const fromLeft = index % 2 === 0;
+      // ── Featured projects: shuffle → home ──────────────────────────────────
+      const featured = sectionRef.current?.querySelectorAll(".featured-project");
+      featured?.forEach((project) => {
+        const imgWrap   = project.querySelector(".project-img-wrap");
+        const infoPanel = project.querySelector(".project-info");
+        const panels    = [imgWrap, infoPanel].filter(Boolean);
 
-        // Info panel
-        const info = project.querySelector(".project-info");
+        // Each panel starts at a unique random position and flies into place
         gsap.fromTo(
-          info,
-          { opacity: 0, x: fromLeft ? -35 : 35 },
+          panels,
           {
-            opacity: 1,
-            x: 0,
-            duration: 0.8,
-            ease: "power3.out",
+            x:        () => gsap.utils.random(-260, 260),
+            y:        () => gsap.utils.random(-120, 120),
+            rotation: () => gsap.utils.random(-22, 22),
+            scale:    () => gsap.utils.random(0.60, 0.82),
+            opacity:  0,
+          },
+          {
+            x: 0, y: 0, rotation: 0, scale: 1, opacity: 1,
+            duration: 1.0,
+            ease: "power4.out",
+            stagger: 0.12,
+            clearProps: "transform",
             scrollTrigger: {
               trigger: project,
               start: "top 82%",
+              once: true,
             },
           },
         );
 
-        // Image panel — scale from 0.88
-        const img = project.querySelector(".project-img-wrap");
-        gsap.fromTo(
-          img,
-          { opacity: 0, scale: 0.88, x: fromLeft ? 35 : -35 },
-          {
-            opacity: 1,
-            scale: 1,
-            x: 0,
-            duration: 0.9,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: project,
-              start: "top 82%",
-            },
-          },
-        );
-
-        // Subtle image parallax on scroll
+        // Subtle image parallax on scroll (unchanged)
         const imgInner = project.querySelector(".project-img-inner");
         gsap.to(imgInner, {
           y: -28,
@@ -209,25 +136,29 @@ export function Projects() {
         });
       });
 
-      // Other projects stagger
+      // ── Other cards: shuffle → home with random stagger order ──────────────
       const otherCards = sectionRef.current?.querySelectorAll(".other-card");
-      const otherGrid = sectionRef.current?.querySelector(
-        ".other-projects-grid",
-      );
+      const otherGrid  = sectionRef.current?.querySelector(".other-projects-grid");
       if (otherCards && otherCards.length > 0) {
         gsap.fromTo(
           Array.from(otherCards),
-          { opacity: 0, y: 30, scale: 0.95 },
           {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            stagger: { each: 0.1, from: "start" },
-            duration: 0.65,
-            ease: "power3.out",
+            x:        () => gsap.utils.random(-200, 200),
+            y:        () => gsap.utils.random(-80, 80),
+            rotation: () => gsap.utils.random(-18, 18),
+            scale:    () => gsap.utils.random(0.55, 0.78),
+            opacity:  0,
+          },
+          {
+            x: 0, y: 0, rotation: 0, scale: 1, opacity: 1,
+            duration: 0.88,
+            ease: "power4.out",
+            stagger: { each: 0.08, from: "random" },
+            clearProps: "transform",
             scrollTrigger: {
               trigger: otherGrid ?? sectionRef.current,
               start: "top 85%",
+              once: true,
             },
           },
         );
@@ -245,6 +176,7 @@ export function Projects() {
     >
       <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto">
+
           {/* Section title */}
           <div ref={titleRef} className="mb-20 opacity-0">
             <div className="flex items-center gap-4 mb-2">
@@ -283,12 +215,11 @@ export function Projects() {
                       style={{ willChange: "transform" }}
                     />
                   </div>
-                  {/* Hover shimmer overlay */}
                   <div className="absolute inset-0 bg-primary/0 hover:bg-primary/8 transition-colors duration-500 rounded-2xl" />
                 </div>
 
                 {/* Info */}
-                <TiltCard
+                <div
                   className={`project-info opacity-0 ${
                     index % 2 === 1 ? "md:order-1" : ""
                   }`}
@@ -344,7 +275,7 @@ export function Projects() {
                       </Link>
                     </div>
                   </div>
-                </TiltCard>
+                </div>
               </div>
             ))}
           </div>
@@ -356,7 +287,7 @@ export function Projects() {
             </h3>
             <div className="other-projects-grid grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {otherProjects.map((project) => (
-                <TiltCard
+                <div
                   key={project.id}
                   className="other-card group bg-card/60 backdrop-blur-sm p-6 rounded-xl border border-border hover:border-primary/40 transition-all duration-400 hover:shadow-[0_0_32px_oklch(0.75_0.15_180_/_0.07)] opacity-0"
                 >
@@ -391,7 +322,7 @@ export function Projects() {
                       </span>
                     ))}
                   </div>
-                </TiltCard>
+                </div>
               ))}
             </div>
           </div>
@@ -408,6 +339,7 @@ export function Projects() {
               </Link>
             </Button>
           </div>
+
         </div>
       </div>
     </section>

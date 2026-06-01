@@ -4,23 +4,30 @@ import { useEffect, useRef } from "react";
 import { Github, Linkedin, Mail } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import dynamic from "next/dynamic";
 import gsap from "gsap";
 
+const TechCube = dynamic(
+  () => import("@/components/ui/tech-cube").then((m) => ({ default: m.TechCube })),
+  { ssr: false, loading: () => null },
+);
+
 export function Hero() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const greetRef = useRef<HTMLParagraphElement>(null);
-  const nameRef = useRef<HTMLHeadingElement>(null);
+  const sectionRef  = useRef<HTMLElement>(null);
+  const greetRef    = useRef<HTMLParagraphElement>(null);
+  const nameRef     = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLHeadingElement>(null);
-  const descRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const socialRef = useRef<HTMLDivElement>(null);
+  const descRef     = useRef<HTMLParagraphElement>(null);
+  const ctaRef      = useRef<HTMLDivElement>(null);
+  const socialRef   = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       const nameEl = nameRef.current;
       if (!nameEl) return;
 
-      // Character split: wrap each char in overflow:hidden container
+      // Character-split reveal
       const text = "Kaique Devesa";
       const fragments = text.split("").map((char) => {
         const outer = document.createElement("span");
@@ -28,7 +35,7 @@ export function Hero() {
           "display:inline-block; overflow:hidden; line-height:1; vertical-align:top;";
         const inner = document.createElement("span");
         inner.style.cssText = "display:inline-block; transform:translateY(110%);";
-        inner.textContent = char === " " ? " " : char;
+        inner.textContent = char === " " ? " " : char;
         outer.appendChild(inner);
         return inner;
       });
@@ -38,63 +45,41 @@ export function Hero() {
 
       const tl = gsap.timeline({ delay: 0.15, defaults: { ease: "power3.out" } });
 
-      // Greeting
-      tl.fromTo(
-        greetRef.current,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.55 }
-      )
-        // Name chars slide up from inside the container (premium reveal)
+      tl.fromTo(greetRef.current,
+          { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.55 })
         .to(fragments, {
-          y: "0%",
-          duration: 0.85,
-          stagger: 0.028,
-          ease: "power4.out",
+          y: "0%", duration: 0.85, stagger: 0.028, ease: "power4.out",
         }, "-=0.1")
-        // Subtitle: horizontal clip-path wipe from left to right
-        .fromTo(
-          subtitleRef.current,
-          { clipPath: "inset(0 100% 0 0)" },
-          { clipPath: "inset(0 0% 0 0)", duration: 0.75, ease: "power2.inOut" },
-          "-=0.55"
-        )
-        // Description fades + rises
-        .fromTo(
-          descRef.current,
-          { opacity: 0, y: 16 },
-          { opacity: 1, y: 0, duration: 0.6 },
-          "-=0.3"
-        )
-        // CTA buttons
-        .fromTo(
-          ctaRef.current,
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 0.55 },
-          "-=0.4"
-        )
-        // Social icons stagger from left
+        .from(subtitleRef.current,
+          { opacity: 0, x: -24, duration: 0.65, ease: "power3.out" },
+          "-=0.45")
+        .from(descRef.current,
+          { opacity: 0, y: 16, duration: 0.6, ease: "power3.out" },
+          "-=0.35")
+        .fromTo(ctaRef.current,
+          { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.55 },
+          "-=0.4")
         .fromTo(
           socialRef.current ? Array.from(socialRef.current.children) : [],
           { opacity: 0, x: -10 },
           { opacity: 1, x: 0, stagger: 0.07, duration: 0.45 },
           "-=0.3"
-        )
+        );
 
       // Magnetic buttons
       const btns = ctaRef.current?.querySelectorAll("a, button");
       btns?.forEach((btn) => {
         const el = btn as HTMLElement;
-        const handleMove = (e: MouseEvent) => {
-          const rect = el.getBoundingClientRect();
-          const x = e.clientX - rect.left - rect.width / 2;
-          const y = e.clientY - rect.top - rect.height / 2;
+        const onMove = (e: MouseEvent) => {
+          const r = el.getBoundingClientRect();
+          const x = e.clientX - r.left  - r.width  / 2;
+          const y = e.clientY - r.top   - r.height / 2;
           gsap.to(el, { x: x * 0.22, y: y * 0.22, duration: 0.45, ease: "power2.out", overwrite: "auto" });
         };
-        const handleLeave = () => {
+        const onLeave = () =>
           gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.55)", overwrite: "auto" });
-        };
-        el.addEventListener("mousemove", handleMove);
-        el.addEventListener("mouseleave", handleLeave);
+        el.addEventListener("mousemove", onMove);
+        el.addEventListener("mouseleave", onLeave);
       });
     }, sectionRef);
 
@@ -104,19 +89,45 @@ export function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      className="min-h-screen flex items-center relative overflow-hidden"
     >
-      {/* Ambient glow */}
+      {/* ── Layer 1: Flickering grid ── */}
+      <FlickeringGrid
+        squareSize={4}
+        gridGap={6}
+        flickerChance={0.3}
+        color="oklch(0.75 0.15 180)"
+        maxOpacity={0.18}
+      />
+
+      {/* ── Layer 2: Radial vignette — fades grid at edges ── */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 90% 55% at 50% -5%, oklch(0.75 0.15 180 / 0.1) 0%, transparent 70%)",
+            "radial-gradient(ellipse 90% 90% at 50% 50%, transparent 25%, var(--background) 80%)",
         }}
       />
 
-      {/* Noise grain texture */}
+      {/* ── Layer 3: Aurora color blobs ── */}
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+        <div className="aurora-1" />
+        <div className="aurora-2" />
+        <div className="aurora-3" />
+      </div>
+
+      {/* ── Layer 4: Top glow ── */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 35% at 50% -5%, oklch(0.75 0.15 180 / 0.06) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* ── Layer 5: Noise grain ── */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none opacity-[0.022]"
@@ -126,19 +137,11 @@ export function Hero() {
         }}
       />
 
-      {/* Subtle dot grid */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, oklch(0.75 0.15 180) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
+      {/* ── Content ── */}
+      <div className="container mx-auto px-6 pt-24 pb-12 relative z-10 w-full">
+        <div className="grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
+        <div>
 
-      <div className="container mx-auto px-6 pt-20 relative z-10">
-        <div className="max-w-5xl mx-auto">
           <p
             ref={greetRef}
             className="text-primary/60 font-medium mb-6 tracking-[0.22em] text-[11px] uppercase opacity-0"
@@ -157,17 +160,14 @@ export function Hero() {
           <h2
             ref={subtitleRef}
             className="font-semibold text-primary mb-10"
-            style={{
-              fontSize: "clamp(1.6rem, 3.5vw, 3rem)",
-              clipPath: "inset(0 100% 0 0)",
-            }}
+            style={{ fontSize: "clamp(1.6rem, 3.5vw, 3rem)" }}
           >
             Desenvolvedor Full Stack
           </h2>
 
           <p
             ref={descRef}
-            className="text-muted-foreground max-w-lg mb-12 leading-relaxed opacity-0"
+            className="text-muted-foreground max-w-lg mb-12 leading-relaxed"
             style={{ fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)" }}
           >
             Construo experiências digitais modernas e responsivas, focando em
@@ -211,9 +211,15 @@ export function Hero() {
               <Mail size={21} />
             </Link>
           </div>
+
         </div>
 
+          {/* ── Right: interactive 3D tech cube ── */}
+          <div className="hidden lg:block h-[560px] relative">
+            <TechCube />
+          </div>
 
+        </div>
       </div>
     </section>
   );
