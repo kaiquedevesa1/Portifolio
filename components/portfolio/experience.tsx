@@ -143,14 +143,9 @@ export function Experience() {
         <div className="max-w-4xl mx-auto">
           {/* Section title */}
           <div ref={titleRef} className="mb-16 opacity-0">
-            <div className="flex items-center gap-4 mb-2">
-              <span
-                className="text-primary font-mono text-sm tracking-widest"
-                style={{ opacity: 0.6 }}
-              >
-                02
-              </span>
-              <div className="h-px flex-1 bg-border" style={{ maxWidth: 60 }} />
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-1.5 h-5 rounded-sm bg-primary" style={{ opacity: 0.7 }} />
+              <div className="h-px bg-border" style={{ width: 48 }} />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
               Experiência

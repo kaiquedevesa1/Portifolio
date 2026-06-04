@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import { Cursor } from "@/components/portfolio/cursor";
 import "./globals.css";
 
 const inter = Inter({
@@ -48,7 +47,6 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}
       >
-        <Cursor />
         {children}
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>

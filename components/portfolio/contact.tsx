@@ -105,7 +105,7 @@ export function Contact() {
             className={`mb-16 text-center ${isVisible ? "animate-fade-up" : "opacity-0"}`}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              <span className="text-primary">04.</span> Contato
+              Contato
             </h2>
             <div className="w-24 h-1 bg-primary rounded-full mx-auto mb-8" />
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">

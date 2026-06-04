@@ -136,32 +136,26 @@ export function Projects() {
         });
       });
 
-      // ── Other cards: shuffle → home with random stagger order ──────────────
+      // ── Other cards: clean staggered fade-up ──────────────────────────────
       const otherCards = sectionRef.current?.querySelectorAll(".other-card");
       const otherGrid  = sectionRef.current?.querySelector(".other-projects-grid");
       if (otherCards && otherCards.length > 0) {
-        gsap.fromTo(
-          Array.from(otherCards),
-          {
-            x:        () => gsap.utils.random(-200, 200),
-            y:        () => gsap.utils.random(-80, 80),
-            rotation: () => gsap.utils.random(-18, 18),
-            scale:    () => gsap.utils.random(0.55, 0.78),
-            opacity:  0,
+        // Set invisible immediately (avoids flash before trigger fires)
+        gsap.set(Array.from(otherCards), { opacity: 0, y: 36 });
+
+        gsap.to(Array.from(otherCards), {
+          opacity: 1,
+          y: 0,
+          duration: 0.65,
+          ease: "power3.out",
+          stagger: { each: 0.1, from: "start" },
+          clearProps: "all",
+          scrollTrigger: {
+            trigger: otherGrid ?? sectionRef.current,
+            start: "top 90%",
+            once: true,
           },
-          {
-            x: 0, y: 0, rotation: 0, scale: 1, opacity: 1,
-            duration: 0.88,
-            ease: "power4.out",
-            stagger: { each: 0.08, from: "random" },
-            clearProps: "transform",
-            scrollTrigger: {
-              trigger: otherGrid ?? sectionRef.current,
-              start: "top 85%",
-              once: true,
-            },
-          },
-        );
+        });
       }
     }, sectionRef);
 
@@ -179,14 +173,9 @@ export function Projects() {
 
           {/* Section title */}
           <div ref={titleRef} className="mb-20 opacity-0">
-            <div className="flex items-center gap-4 mb-2">
-              <span
-                className="text-primary font-mono text-sm tracking-widest"
-                style={{ opacity: 0.6 }}
-              >
-                03
-              </span>
-              <div className="h-px flex-1 bg-border" style={{ maxWidth: 60 }} />
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-1.5 h-5 rounded-sm bg-primary" style={{ opacity: 0.7 }} />
+              <div className="h-px bg-border" style={{ width: 48 }} />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
               Projetos
@@ -289,7 +278,7 @@ export function Projects() {
               {otherProjects.map((project) => (
                 <div
                   key={project.id}
-                  className="other-card group bg-card/60 backdrop-blur-sm p-6 rounded-xl border border-border hover:border-primary/40 transition-all duration-400 hover:shadow-[0_0_32px_oklch(0.75_0.15_180_/_0.07)] opacity-0"
+                  className="other-card group bg-card/60 backdrop-blur-sm p-6 rounded-xl border border-border hover:border-primary/40 transition-all duration-400 hover:shadow-[0_0_32px_oklch(0.75_0.15_180_/_0.07)]"
                 >
                   <div className="flex items-center justify-between mb-5">
                     <Folder

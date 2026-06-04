@@ -124,14 +124,6 @@
   }
 }
 
-/* ─── Custom cursor (desktop only) ─── */
-@media (pointer: fine) {
-  html,
-  body,
-  * {
-    cursor: none !important;
-  }
-}
 
 /* ─── Keyframes ─── */
 @keyframes fade-up {
